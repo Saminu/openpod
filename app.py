@@ -16,6 +16,15 @@ from pathlib import Path
 env_path = Path('.') / '.env'
 load_dotenv(dotenv_path=env_path, override=True)
 
+# Print loaded environment variables (redacted for security)
+print("\n=== Environment Variables Loaded ===")
+for key in ['API_TOKEN', 'GEMINI_API_KEY', 'OPENAI_API_KEY', 'ELEVENLABS_API_KEY']:
+    value = os.getenv(key)
+    if value:
+        print(f"{key}: {value[:5]}...{value[-5:]}")
+    else:
+        print(f"{key}: Not set")
+
 # Create required directories
 TEMP_DIR = '/tmp/audio'
 STATIC_DIR = os.path.join(os.path.dirname(__file__), 'static')
@@ -132,12 +141,23 @@ def handle_generate_podcast(data):
 
         # Set up API keys based on selected model
         api_key_label = None
+
+        # Always set up Google API key for content generation
+        google_api_key = data.get('google_key')
+        if not google_api_key:
+            # Try to get from environment variable if not in request
+            google_api_key = os.getenv('GEMINI_API_KEY')
+            if not google_api_key:
+                raise ValueError("Missing Google API key for content generation")
+
+        # Print the API key for debugging (redacted for security)
+        print(f"Using Google API key: {google_api_key[:5]}...{google_api_key[-5:]}")
+
+        os.environ['GOOGLE_API_KEY'] = google_api_key
+        os.environ['GEMINI_API_KEY'] = google_api_key
+
+        # Set up TTS-specific API keys
         if tts_model in ['gemini', 'geminimulti']:
-            api_key = data.get('google_key')
-            if not api_key:
-                raise ValueError("Missing Google API key")
-            os.environ['GOOGLE_API_KEY'] = api_key
-            os.environ['GEMINI_API_KEY'] = api_key
             api_key_label = 'GEMINI_API_KEY'
         elif tts_model == 'elevenlabs':
             api_key = data.get('elevenlabs_key')
@@ -155,6 +175,10 @@ def handle_generate_podcast(data):
                 api_key = os.getenv('OPENAI_API_KEY')
                 if not api_key:
                     raise ValueError("Missing OpenAI API key")
+
+            # Print the API key for debugging (redacted for security)
+            print(f"Using OpenAI API key: {api_key[:5]}...{api_key[-5:]}")
+
             os.environ['OPENAI_API_KEY'] = api_key
             api_key_label = 'OPENAI_API_KEY'
         elif tts_model == 'edge':
@@ -376,12 +400,23 @@ def generate_from_transcript():
 
         # Set up API keys if needed
         api_key_label = None
+
+        # Always set up Google API key for content generation
+        google_api_key = data.get('google_key')
+        if not google_api_key:
+            # Try to get from environment variable if not in request
+            google_api_key = os.getenv('GEMINI_API_KEY')
+            if not google_api_key:
+                return jsonify({'error': 'Missing Google API key for content generation'}), 400
+
+        # Print the API key for debugging (redacted for security)
+        print(f"Using Google API key: {google_api_key[:5]}...{google_api_key[-5:]}")
+
+        os.environ['GOOGLE_API_KEY'] = google_api_key
+        os.environ['GEMINI_API_KEY'] = google_api_key
+
+        # Set up TTS-specific API keys
         if tts_model in ['gemini', 'geminimulti']:
-            api_key = data.get('google_key')
-            if not api_key:
-                return jsonify({'error': 'Missing Google API key'}), 400
-            os.environ['GOOGLE_API_KEY'] = api_key
-            os.environ['GEMINI_API_KEY'] = api_key
             api_key_label = 'GEMINI_API_KEY'
         elif tts_model == 'elevenlabs':
             api_key = data.get('elevenlabs_key')
@@ -399,6 +434,10 @@ def generate_from_transcript():
                 api_key = os.getenv('OPENAI_API_KEY')
                 if not api_key:
                     return jsonify({'error': 'Missing OpenAI API key'}), 400
+
+            # Print the API key for debugging (redacted for security)
+            print(f"Using OpenAI API key: {api_key[:5]}...{api_key[-5:]}")
+
             os.environ['OPENAI_API_KEY'] = api_key
             api_key_label = 'OPENAI_API_KEY'
         elif tts_model == 'edge':

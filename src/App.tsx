@@ -1,13 +1,10 @@
 import { useState, useEffect } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CustomPodcast } from "@/components/CustomPodcast";
 import { APIKeys } from "@/components/APIKeys";
 import { TopicPodcast } from "@/components/TopicPodcast";
 import { Toaster } from "@/components/ui/toaster";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState("custom");
-
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://buttons.github.io/buttons.js";
@@ -52,25 +49,17 @@ export default function App() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          <div className="lg:col-span-2">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2 mb-8">
-                <TabsTrigger value="custom">Custom Podcast</TabsTrigger>
-                <TabsTrigger value="topic">Topic Research</TabsTrigger>
-              </TabsList>
-              <TabsContent value="custom">
-                <CustomPodcast />
-              </TabsContent>
-              <TabsContent value="topic">
-                <TopicPodcast />
-              </TabsContent>
-            </Tabs>
-          </div>
-
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
           <div className="lg:col-span-1">
-            <APIKeys />
+            <CustomPodcast />
           </div>
+          <div className="lg:col-span-1">
+            <TopicPodcast />
+          </div>
+        </div>
+
+        <div className="mt-8 max-w-6xl mx-auto">
+          <APIKeys />
         </div>
       </div>
       <Toaster />
