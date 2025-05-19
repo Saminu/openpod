@@ -4,9 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Play, Download } from "lucide-react";
+import { Loader2, Play, Download, Save } from "lucide-react";
 import { io } from "socket.io-client";
 import { Card } from "@/components/ui/card";
+import { addPodcastToLibrary } from "@/components/PodcastLibrary";
 import {
   Accordion,
   AccordionContent,
@@ -33,16 +34,7 @@ export function TopicPodcast() {
       return;
     }
 
-    // Get the Gemini API key
-    const apiKey = sessionStorage.getItem("google_key");
-    if (!apiKey) {
-      toast({
-        title: "Missing API Key",
-        description: "Please set your Google API key first",
-        variant: "destructive",
-      });
-      return;
-    }
+    // API keys are now loaded from .env file on the server
 
     setIsGenerating(true);
     setProgress(0);
@@ -63,7 +55,6 @@ export function TopicPodcast() {
 
         const payload = {
           topics: topic,
-          google_key: apiKey,
         };
 
         socket.emit("generate_news_podcast", payload);
@@ -149,6 +140,21 @@ export function TopicPodcast() {
             >
               <Download className="mr-2 h-4 w-4" />
               Download
+            </Button>
+            <Button
+              className="flex-1"
+              onClick={() => {
+                const podcastName = `Topic Podcast: ${topic}`;
+                addPodcastToLibrary(audioUrl, podcastName);
+                toast({
+                  title: "Saved to Library",
+                  description: "Podcast has been added to your library",
+                });
+              }}
+              variant="default"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              Save to Library
             </Button>
           </div>
 

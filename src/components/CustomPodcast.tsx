@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2, Play, Download, X, ImagePlus } from "lucide-react";
+import { Loader2, Play, Download, X, ImagePlus, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
 import { io } from "socket.io-client";
+import { addPodcastToLibrary } from "@/components/PodcastLibrary";
 import {
   Accordion,
   AccordionContent,
@@ -309,20 +310,9 @@ export function CustomPodcast() {
     setParsedUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // API keys are now loaded from .env file on the server
   const getRequiredApiKey = (model: TTSModel) => {
-    switch (model) {
-      case "geminimulti":
-        return { key: sessionStorage.getItem("google_key"), name: "Google" };
-      case "openai":
-        return { key: sessionStorage.getItem("openai_key"), name: "OpenAI" };
-      case "elevenlabs":
-        return {
-          key: sessionStorage.getItem("elevenlabs_key"),
-          name: "ElevenLabs",
-        };
-      case "edge":
-        return null; // No API key required
-    }
+    return null; // No API keys needed from the UI
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -378,21 +368,8 @@ export function CustomPodcast() {
           image_urls: parsedImageUrls.length > 0 ? parsedImageUrls : undefined,
         };
 
-        // Add API key based on selected model
-        const requiredApiKey = getRequiredApiKey(values.ttsModel as TTSModel);
-        if (requiredApiKey) {
-          switch (values.ttsModel) {
-            case "geminimulti":
-              payload.google_key = requiredApiKey.key || undefined;
-              break;
-            case "openai":
-              payload.openai_key = requiredApiKey.key || undefined;
-              break;
-            case "elevenlabs":
-              payload.elevenlabs_key = requiredApiKey.key || undefined;
-              break;
-          }
-        }
+        // API keys are now loaded from .env file on the server
+        // No need to add API keys to the payload
 
         socket.emit("generate_podcast", payload);
       });
@@ -525,17 +502,17 @@ export function CustomPodcast() {
         </div>
 
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="urls">Enter URLs</Label>
-            <Textarea
-              id="urls"
-              placeholder="Paste content containing URLs or type and press Enter to extract"
-              {...form.register("urls")}
-              onPaste={onPaste}
-              onKeyDown={onKeyDown}
-              className="min-h-[100px] font-mono text-sm"
-            />
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="urls">Enter URLs</Label>
+          <Textarea
+            id="urls"
+            placeholder="Paste content containing URLs or type and press Enter to extract"
+            {...form.register("urls")}
+            onPaste={onPaste}
+            onKeyDown={onKeyDown}
+            className="min-h-[100px] font-mono text-sm"
+          />
+        </div>
 
           {parsedUrls.length > 0 && (
             <div className="space-y-2">
@@ -1001,6 +978,21 @@ export function CustomPodcast() {
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Download
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={() => {
+                    const podcastName = form.getValues("podcastName") || "Custom Podcast";
+                    addPodcastToLibrary(audioUrl, podcastName);
+                    toast({
+                      title: "Saved to Library",
+                      description: "Podcast has been added to your library",
+                    });
+                  }}
+                  variant="default"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Save to Library
                 </Button>
               </div>
 
