@@ -209,7 +209,7 @@ export function CustomPodcast() {
       conversationStyles: ["Engaging", "Fast-paced", "Enthusiastic"],
       dialogueStructure: ["Discussions"],
       engagementTechniques: ["Questions"],
-      ttsModel: "geminimulti",
+      ttsModel: "openai",
       imageUrls: "",
     },
   });
@@ -953,14 +953,14 @@ export function CustomPodcast() {
                           <SelectValue placeholder="Select TTS model" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="geminimulti">
-                            Google Gemini Multi (requires API key)
-                          </SelectItem>
                           <SelectItem value="edge">
                             Microsoft Edge TTS (Free)
                           </SelectItem>
                           <SelectItem value="openai">
                             OpenAI TTS (requires API key)
+                          </SelectItem>
+                          <SelectItem value="geminimulti">
+                            Google Gemini Multi (requires API key)
                           </SelectItem>
                           <SelectItem value="elevenlabs">
                             ElevenLabs (requires API key)

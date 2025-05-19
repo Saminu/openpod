@@ -126,8 +126,8 @@ def handle_generate_podcast(data):
         print("\n=== Starting Podcast Generation ===")
         emit('status', "Starting podcast generation...")
 
-        # Get the selected TTS model
-        tts_model = data.get('tts_model', 'geminimulti')
+        # Get the selected TTS model from the frontend
+        tts_model = data.get('tts_model', 'edge')
         print(f"\nSelected TTS Model: {tts_model}")
 
         # Set up API keys based on selected model
@@ -139,6 +139,27 @@ def handle_generate_podcast(data):
             os.environ['GOOGLE_API_KEY'] = api_key
             os.environ['GEMINI_API_KEY'] = api_key
             api_key_label = 'GEMINI_API_KEY'
+        elif tts_model == 'elevenlabs':
+            api_key = data.get('elevenlabs_key')
+            if not api_key:
+                # Try to get from environment variable if not in request
+                api_key = os.getenv('ELEVENLABS_API_KEY')
+                if not api_key:
+                    raise ValueError("Missing ElevenLabs API key")
+            os.environ['ELEVENLABS_API_KEY'] = api_key
+            api_key_label = 'ELEVENLABS_API_KEY'
+        elif tts_model == 'openai':
+            api_key = data.get('openai_key')
+            if not api_key:
+                # Try to get from environment variable if not in request
+                api_key = os.getenv('OPENAI_API_KEY')
+                if not api_key:
+                    raise ValueError("Missing OpenAI API key")
+            os.environ['OPENAI_API_KEY'] = api_key
+            api_key_label = 'OPENAI_API_KEY'
+        elif tts_model == 'edge':
+            # No API key required for Edge TTS
+            api_key_label = None
 
         conversation_config = {
             'creativity': float(data.get('creativity', 0.7)),
@@ -154,7 +175,7 @@ def handle_generate_podcast(data):
             'text_to_speech': {
                 'temp_audio_dir': TEMP_DIR,
                 'ending_message': "Thank you for listening to this episode.",
-                'default_tts_model': 'geminimulti',
+                'default_tts_model': tts_model,
                 'audio_format': 'mp3'
             }
         }
@@ -164,6 +185,9 @@ def handle_generate_podcast(data):
 
         # Add image_paths parameter if provided
         image_paths = data.get('image_urls', [])
+
+        # Force the TTS model in the conversation_config as well
+        conversation_config['text_to_speech']['default_tts_model'] = tts_model
 
         result = generate_podcast(
             urls=data.get('urls', []),
@@ -286,6 +310,7 @@ def serve_audio(filename):
     possible_paths = [
         os.path.join('data/audio', filename),
         os.path.join(AUDIO_DIR, filename),
+        os.path.join(TEMP_DIR, filename),  # Add TEMP_DIR to the list of possible paths
         # Add any additional mounted volume paths here
         "/app/data/audio/" + filename,
     ]
@@ -294,6 +319,11 @@ def serve_audio(filename):
         if os.path.exists(path):
             print(f"Serving audio from: {path}")
             return send_file(path)
+
+    # Debug information
+    print(f"Audio file not found: {filename}")
+    print(f"Checked paths: {possible_paths}")
+    print(f"TEMP_DIR contents: {os.listdir(TEMP_DIR) if os.path.exists(TEMP_DIR) else 'TEMP_DIR not found'}")
 
     return jsonify({'error': 'Audio file not found'}), 404
 
@@ -309,7 +339,9 @@ def generate_from_transcript():
 
         # Extract parameters from request
         transcript = data['transcript']
-        tts_model = data.get('tts_model', 'geminimulti')
+        # Get the selected TTS model from the request
+        tts_model = data.get('tts_model', 'edge')
+        print(f"\nSelected TTS Model: {tts_model}")
 
         # Create temporary transcript file
         with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as temp_file:
@@ -351,6 +383,30 @@ def generate_from_transcript():
             os.environ['GOOGLE_API_KEY'] = api_key
             os.environ['GEMINI_API_KEY'] = api_key
             api_key_label = 'GEMINI_API_KEY'
+        elif tts_model == 'elevenlabs':
+            api_key = data.get('elevenlabs_key')
+            if not api_key:
+                # Try to get from environment variable if not in request
+                api_key = os.getenv('ELEVENLABS_API_KEY')
+                if not api_key:
+                    return jsonify({'error': 'Missing ElevenLabs API key'}), 400
+            os.environ['ELEVENLABS_API_KEY'] = api_key
+            api_key_label = 'ELEVENLABS_API_KEY'
+        elif tts_model == 'openai':
+            api_key = data.get('openai_key')
+            if not api_key:
+                # Try to get from environment variable if not in request
+                api_key = os.getenv('OPENAI_API_KEY')
+                if not api_key:
+                    return jsonify({'error': 'Missing OpenAI API key'}), 400
+            os.environ['OPENAI_API_KEY'] = api_key
+            api_key_label = 'OPENAI_API_KEY'
+        elif tts_model == 'edge':
+            # No API key required for Edge TTS
+            api_key_label = None
+
+        # Force the TTS model in the conversation_config as well
+        conversation_config['text_to_speech']['default_tts_model'] = tts_model
 
         # Generate the podcast
         result = generate_podcast(
