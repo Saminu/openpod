@@ -1,8 +1,10 @@
-## AI Podcast Generator
+# Spark Audio Notebook
 
-A modern web application that automatically generates engaging podcast conversations from URLs or news topics using AI. Powered by [podcastfy.ai](http://podcastfy.ai).
+A modern web application that automatically generates engaging podcast conversations from URLs or news topics using AI.
 
-### Features
+See [SYSTEM_ARCHITECTURE.md](./SYSTEM_ARCHITECTURE.md) for a detailed explanation of the project structure and architecture.
+
+## Features
 
 - Custom podcast generation from multiple URLs
 - Real-time progress updates using WebSocket
