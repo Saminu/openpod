@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Play, Download, Save } from "lucide-react";
+import { Loader2, Play, Download, Save, Globe } from "lucide-react";
 import { io } from "socket.io-client";
 import { Card } from "@/components/ui/card";
 import { addPodcastToLibrary } from "@/components/PodcastLibrary";
@@ -14,6 +14,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function TopicPodcast() {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -22,6 +29,7 @@ export function TopicPodcast() {
   const [audioUrl, setAudioUrl] = useState("");
   const [transcript, setTranscript] = useState("");
   const [topic, setTopic] = useState("");
+  const [language, setLanguage] = useState("English");
   const { toast } = useToast();
 
   const generateTopicPodcast = async () => {
@@ -43,24 +51,61 @@ export function TopicPodcast() {
     setTranscript("");
 
     try {
-      const socket = io({
+      const socket = io("http://localhost:8082", {
         path: "/socket.io",
         reconnection: true,
-        timeout: 10000,
+        timeout: 20000, // Increase timeout
+        reconnectionAttempts: 3,
+        transports: ['websocket', 'polling']
       });
+
+      // Set a timeout in case the connection hangs
+      const connectionTimeout = setTimeout(() => {
+        if (socket.connected === false) {
+          console.error("Connection timeout");
+          toast({
+            title: "Connection Timeout",
+            description: "Could not connect to the server. Please try again.",
+            variant: "destructive",
+          });
+          socket.disconnect();
+          setIsGenerating(false);
+        }
+      }, 15000);
 
       socket.on("connect", () => {
         console.log("Socket connected successfully");
+        clearTimeout(connectionTimeout);
         setStatusMessage("Connected to server");
+        setProgress(10);
 
         const payload = {
           topics: topic,
+          output_language: language,
         };
 
+        console.log("Sending request:", payload);
         socket.emit("generate_news_podcast", payload);
       });
 
+      socket.on("connect_error", (error) => {
+        console.error("Connection error:", error);
+        clearTimeout(connectionTimeout);
+        toast({
+          title: "Connection Error",
+          description: "Could not connect to the server. Please check if the server is running.",
+          variant: "destructive",
+        });
+        setIsGenerating(false);
+      });
+
+      socket.on("status", (message: string) => {
+        console.log("Status update:", message);
+        setStatusMessage(message);
+      });
+
       socket.on("progress", (data: { progress: number; message: string }) => {
+        console.log("Progress update:", data);
         setProgress(data.progress);
         setStatusMessage(data.message);
       });
@@ -73,9 +118,39 @@ export function TopicPodcast() {
           setTranscript(data.transcript);
           socket.disconnect();
           setIsGenerating(false);
+
+          toast({
+            title: "Success",
+            description: "Podcast generated successfully!",
+          });
         }
       );
+
+      socket.on("error", (error: { message: string }) => {
+        console.error("Socket error:", error);
+        toast({
+          title: "Error",
+          description: error.message || "Failed to generate podcast",
+          variant: "destructive",
+        });
+        socket.disconnect();
+        setIsGenerating(false);
+      });
+
+      socket.on("disconnect", () => {
+        console.log("Socket disconnected");
+        clearTimeout(connectionTimeout);
+        if (isGenerating) {
+          toast({
+            title: "Connection Lost",
+            description: "The connection to the server was lost",
+            variant: "destructive",
+          });
+          setIsGenerating(false);
+        }
+      });
     } catch (error: any) {
+      console.error("Error in generateTopicPodcast:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to generate podcast",
@@ -89,7 +164,7 @@ export function TopicPodcast() {
     <Card className="p-6 space-y-6">
       <div className="space-y-4">
         <div>
-          <h2 className="text-lg font-semibold mb-2">Topic Research Podcast</h2>
+          <h2 className="text-xl font-semibold mb-2 bg-gradient-to-r from-[#0DFFD8] to-[#00B3A0] text-transparent bg-clip-text">Topic Explorer</h2>
           <p className="text-sm text-muted-foreground mb-4">
             Enter any topic and we'll research it, synthesize the information,
             and create an engaging podcast discussion about it. Perfect for
@@ -109,6 +184,39 @@ export function TopicPodcast() {
           <p className="text-sm text-muted-foreground">
             Be as specific or broad as you'd like. We'll research and create an
             informative discussion about it.
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="language" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            Language
+          </Label>
+          <Select
+            value={language}
+            onValueChange={setLanguage}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select language" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="English">English</SelectItem>
+              <SelectItem value="Spanish">Spanish (Español)</SelectItem>
+              <SelectItem value="French">French (Français)</SelectItem>
+              <SelectItem value="German">German (Deutsch)</SelectItem>
+              <SelectItem value="Italian">Italian (Italiano)</SelectItem>
+              <SelectItem value="Portuguese">Portuguese (Português)</SelectItem>
+              <SelectItem value="Dutch">Dutch (Nederlands)</SelectItem>
+              <SelectItem value="Russian">Russian (Русский)</SelectItem>
+              <SelectItem value="Japanese">Japanese (日本語)</SelectItem>
+              <SelectItem value="Chinese">Chinese (中文)</SelectItem>
+              <SelectItem value="Korean">Korean (한국어)</SelectItem>
+              <SelectItem value="Arabic">Arabic (العربية)</SelectItem>
+              <SelectItem value="Hindi">Hindi (हिन्दी)</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-sm text-muted-foreground">
+            Select the language for your podcast. The AI will generate content in this language.
           </p>
         </div>
       </div>

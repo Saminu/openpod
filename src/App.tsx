@@ -1,62 +1,28 @@
-import { useEffect } from "react";
 import { CustomPodcast } from "@/components/CustomPodcast";
 import { TopicPodcast } from "@/components/TopicPodcast";
 import { PodcastLibrary } from "@/components/PodcastLibrary";
 import { Toaster } from "@/components/ui/toaster";
 
 export default function App() {
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://buttons.github.io/buttons.js";
-    script.async = true;
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
 
   return (
-    <div className="min-h-screen w-full bg-background">
-      <div className="container mx-auto py-8 px-4">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold mb-3">OpenPod</h1>
-          <p className="text-lg text-muted-foreground mb-4">
-            Transform any content into engaging podcast conversations
-          </p>
-          <div className="flex flex-column items-center justify-center gap-4 text-sm text-muted-foreground">
-            <p className="text-sm text-muted-foreground">
-              Powered by{" "}
-              <a
-                href="https://podcastfy.ai"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline font-medium"
-              >
-                Podcastfy
-              </a>
-            </p>
-            <a
-              className="github-button"
-              href="https://github.com/giulioco/openpod"
-              data-color-scheme="no-preference: light_high_contrast; light: dark; dark: dark;"
-              data-size="large"
-              data-show-count="true"
-              aria-label="Star giulioco/openpod on GitHub"
-            >
-              Star
-            </a>
-          </div>
+    <div className="h-screen w-full bg-background flex flex-col overflow-hidden">
+      <div className="flex items-center justify-center bg-card py-4 px-6 border-b border-border shadow-md">
+        <div className="flex items-center">
+          <img src="/echosphere-logo-modern.svg" alt="EchoSphere Logo" className="h-10 w-10 mr-3" />
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-[#0DFFD8] to-[#00B3A0] text-transparent bg-clip-text">Spark Audio Notebook</h1>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          <div className="lg:col-span-1">
+      <div className="flex-1 overflow-hidden">
+        <div className="h-full grid grid-cols-1 lg:grid-cols-3 gap-4 p-4 overflow-auto">
+          <div className="lg:col-span-1 overflow-auto">
             <CustomPodcast />
           </div>
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 overflow-auto">
             <TopicPodcast />
           </div>
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 overflow-auto">
             <PodcastLibrary />
           </div>
         </div>

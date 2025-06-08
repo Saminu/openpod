@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Circular gradient background -->
+  <defs>
+    <radialGradient id="paint0_radial" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(100 100) rotate(90) scale(100)">
+      <stop offset="0" stop-color="#8B5CF6"/>
+      <stop offset="0.5" stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#EC4899"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Main circle -->
+  <circle cx="100" cy="100" r="95" fill="url(#paint0_radial)" stroke="white" stroke-width="2"/>
+  
+  <!-- Sound waves -->
+  <circle cx="100" cy="100" r="30" fill="white" fill-opacity="0.2" stroke="white" stroke-width="2"/>
+  <circle cx="100" cy="100" r="50" fill="none" stroke="white" stroke-width="2" stroke-dasharray="4 4"/>
+  <circle cx="100" cy="100" r="70" fill="none" stroke="white" stroke-width="2" stroke-dasharray="6 6"/>
+  
+  <!-- Microphone icon -->
+  <path d="M100 60C91.7157 60 85 66.7157 85 75V100C85 108.284 91.7157 115 100 115C108.284 115 115 108.284 115 100V75C115 66.7157 108.284 60 100 60Z" fill="white"/>
+  <path d="M80 95V100C80 111.046 88.9543 120 100 120C111.046 120 120 111.046 120 100V95" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M100 120V135" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M85 135H115" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Globe elements -->
+  <ellipse cx="100" cy="100" rx="25" ry="70" fill="none" stroke="white" stroke-width="1.5" transform="rotate(30 100 100)"/>
+  <ellipse cx="100" cy="100" rx="25" ry="70" fill="none" stroke="white" stroke-width="1.5" transform="rotate(-30 100 100)"/>
+  <ellipse cx="100" cy="100" rx="25" ry="70" fill="none" stroke="white" stroke-width="1.5" transform="rotate(90 100 100)"/>
+</svg>

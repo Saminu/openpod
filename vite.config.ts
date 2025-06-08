@@ -12,20 +12,20 @@ export default defineConfig({
   server: {
     proxy: {
       "/socket.io": {
-        target: "http://localhost:8080",
+        target: "http://localhost:8082",
         ws: true,
         changeOrigin: true,
       },
       "/api": {
-        target: "http://localhost:8080",
+        target: "http://localhost:8082",
         changeOrigin: true,
       },
       "/audio": {
-        target: "http://localhost:8080",
+        target: "http://localhost:8082",
         changeOrigin: true,
       },
       "/static": {
-        target: "http://localhost:8080",
+        target: "http://localhost:8082",
         changeOrigin: true,
       },
     },

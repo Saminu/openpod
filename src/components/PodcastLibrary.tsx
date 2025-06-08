@@ -60,12 +60,12 @@ export function PodcastLibrary() {
     const updatedPodcasts = podcasts.filter((podcast) => podcast.id !== id);
     setPodcasts(updatedPodcasts);
     localStorage.setItem("saved_podcasts", JSON.stringify(updatedPodcasts));
-    
+
     // If the deleted podcast was playing, stop it
     if (currentlyPlaying === id) {
       setCurrentlyPlaying(null);
     }
-    
+
     toast({
       title: "Podcast Removed",
       description: "The podcast has been removed from your library",
@@ -90,7 +90,7 @@ export function PodcastLibrary() {
   return (
     <Card className="p-4">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Your Podcasts</h2>
+        <h2 className="text-xl font-semibold bg-gradient-to-r from-[#0DFFD8] to-[#00B3A0] text-transparent bg-clip-text">Your Library</h2>
       </div>
 
       {isLoading ? (
@@ -131,7 +131,7 @@ export function PodcastLibrary() {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                  
+
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
@@ -160,7 +160,7 @@ export function PodcastLibrary() {
                   </AlertDialog>
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center text-xs text-muted-foreground space-x-2">
                   <span>{formatDate(podcast.date)}</span>
@@ -174,7 +174,7 @@ export function PodcastLibrary() {
                     </>
                   )}
                 </div>
-                
+
                 <Button
                   variant="secondary"
                   size="sm"
@@ -194,7 +194,7 @@ export function PodcastLibrary() {
                   )}
                 </Button>
               </div>
-              
+
               {currentlyPlaying === podcast.id && (
                 <div className="mt-3">
                   <audio
@@ -220,16 +220,16 @@ export function PodcastLibrary() {
 export function addPodcastToLibrary(url: string, name: string = "Generated Podcast") {
   const savedPodcasts = localStorage.getItem("saved_podcasts");
   let podcasts: PodcastFile[] = savedPodcasts ? JSON.parse(savedPodcasts) : [];
-  
+
   const newPodcast: PodcastFile = {
     id: Date.now().toString(),
     name,
     url,
     date: new Date().toISOString(),
   };
-  
+
   podcasts = [...podcasts, newPodcast];
   localStorage.setItem("saved_podcasts", JSON.stringify(podcasts));
-  
+
   return newPodcast;
 }

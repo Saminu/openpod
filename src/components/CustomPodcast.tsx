@@ -76,6 +76,7 @@ interface PodcastPayload {
   openai_key?: string;
   elevenlabs_key?: string;
   image_urls?: string[];
+  output_language: string;
 }
 
 const formSchema = z.object({
@@ -92,6 +93,7 @@ const formSchema = z.object({
   engagementTechniques: z.array(z.string()),
   ttsModel: z.string(),
   imageUrls: z.string(),
+  outputLanguage: z.string().default("English"),
 });
 
 const extractUrls = (text: string): string[] => {
@@ -210,8 +212,9 @@ export function CustomPodcast() {
       conversationStyles: ["Engaging", "Fast-paced", "Enthusiastic"],
       dialogueStructure: ["Discussions"],
       engagementTechniques: ["Questions"],
-      ttsModel: "openai",
+      ttsModel: "openai", // Using OpenAI as the default TTS model
       imageUrls: "",
+      outputLanguage: "English", // Default language
     },
   });
 
@@ -334,10 +337,12 @@ export function CustomPodcast() {
       setTranscript(""); // Clear previous transcript
 
       // Create socket connection
-      const socket = io({
+      const socket = io("http://localhost:8082", {
         path: "/socket.io",
         reconnection: true,
-        timeout: 10000,
+        timeout: 20000,
+        reconnectionAttempts: 3,
+        transports: ['websocket', 'polling']
       });
 
       // Handle cleanup
@@ -366,6 +371,7 @@ export function CustomPodcast() {
           engagement_techniques: values.engagementTechniques,
           tts_model: values.ttsModel as TTSModel,
           image_urls: parsedImageUrls.length > 0 ? parsedImageUrls : undefined,
+          output_language: values.outputLanguage,
         };
 
         // API keys are now loaded from .env file on the server
@@ -490,7 +496,7 @@ export function CustomPodcast() {
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
       <Card className="p-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Custom Podcast</h2>
+          <h2 className="text-xl font-semibold bg-gradient-to-r from-[#0DFFD8] to-[#00B3A0] text-transparent bg-clip-text">Content Studio</h2>
           <Button
             variant="outline"
             size="sm"
@@ -930,20 +936,75 @@ export function CustomPodcast() {
                           <SelectValue placeholder="Select TTS model" />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="openai">
+                            OpenAI TTS (Recommended)
+                          </SelectItem>
                           <SelectItem value="edge">
                             Microsoft Edge TTS (Free)
                           </SelectItem>
-                          <SelectItem value="openai">
-                            OpenAI TTS (requires API key)
-                          </SelectItem>
                           <SelectItem value="geminimulti">
-                            Google Gemini Multi (requires API key)
+                            Google Gemini Multi
                           </SelectItem>
                           <SelectItem value="elevenlabs">
-                            ElevenLabs (requires API key)
+                            ElevenLabs
                           </SelectItem>
                         </SelectContent>
                       </Select>
+
+                      <div className="space-y-2 mt-4">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="output-language">Output Language</Label>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  type="button"
+                                  className="h-6 w-6 p-0"
+                                >
+                                  <InfoCircledIcon className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-sm">
+                                <div className="space-y-2 text-sm">
+                                  <p>
+                                    Select the language for your podcast. The AI will generate content in this language.
+                                  </p>
+                                  <p>
+                                    Note: Language support may vary depending on the selected TTS model.
+                                  </p>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                        <Select
+                          value={form.watch("outputLanguage")}
+                          onValueChange={(value: string) =>
+                            form.setValue("outputLanguage", value)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select language" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="English">English</SelectItem>
+                            <SelectItem value="Spanish">Spanish (Español)</SelectItem>
+                            <SelectItem value="French">French (Français)</SelectItem>
+                            <SelectItem value="German">German (Deutsch)</SelectItem>
+                            <SelectItem value="Italian">Italian (Italiano)</SelectItem>
+                            <SelectItem value="Portuguese">Portuguese (Português)</SelectItem>
+                            <SelectItem value="Dutch">Dutch (Nederlands)</SelectItem>
+                            <SelectItem value="Russian">Russian (Русский)</SelectItem>
+                            <SelectItem value="Japanese">Japanese (日本語)</SelectItem>
+                            <SelectItem value="Chinese">Chinese (中文)</SelectItem>
+                            <SelectItem value="Korean">Korean (한국어)</SelectItem>
+                            <SelectItem value="Arabic">Arabic (العربية)</SelectItem>
+                            <SelectItem value="Hindi">Hindi (हिन्दी)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
                 </div>

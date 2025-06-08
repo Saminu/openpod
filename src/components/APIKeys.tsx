@@ -172,14 +172,14 @@ export function APIKeys() {
   };
 
   return (
-    <Card className="p-6">
-      <h2 className="text-xl font-semibold mb-6">API Keys</h2>
+    <Card className="p-4">
+      <h2 className="text-lg font-semibold mb-4">API Keys</h2>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {Object.entries(keys).map(([type, value]) => (
-          <div key={type} className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Label htmlFor={type} className="capitalize">
+          <div key={type} className="space-y-1">
+            <div className="flex items-center gap-1">
+              <Label htmlFor={type} className="capitalize text-sm">
                 {type === "google"
                   ? "Google"
                   : type === "openai"
@@ -195,7 +195,7 @@ export function APIKeys() {
                 }
               />
             </div>
-            <div className="flex space-x-2">
+            <div className="flex space-x-1">
               <div className="relative flex-1">
                 <Input
                   id={type}
@@ -206,23 +206,27 @@ export function APIKeys() {
                   onChange={(e) =>
                     setKeys((prev) => ({ ...prev, [type]: e.target.value }))
                   }
-                  className="pr-10"
+                  className="pr-10 h-8 text-sm"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                  className="absolute right-0 top-0 h-full px-2 hover:bg-transparent"
                   onClick={() => toggleShowKey(type as keyof typeof keys)}
                 >
                   {showKeys[type as keyof typeof keys] ? (
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    <EyeOff className="h-3 w-3 text-muted-foreground" />
                   ) : (
-                    <Eye className="h-4 w-4 text-muted-foreground" />
+                    <Eye className="h-3 w-3 text-muted-foreground" />
                   )}
                 </Button>
               </div>
-              <Button onClick={() => saveKey(type as keyof typeof keys)}>
+              <Button
+                onClick={() => saveKey(type as keyof typeof keys)}
+                size="sm"
+                className="h-8"
+              >
                 Save
               </Button>
             </div>
